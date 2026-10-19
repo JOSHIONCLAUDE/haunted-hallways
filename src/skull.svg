@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="200" height="250">
+  <defs>
+    <radialGradient id="bone" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="#f4eedb"/><stop offset="0.7" stop-color="#d9d0b6"/><stop offset="1" stop-color="#9c9276"/></radialGradient>
+    <linearGradient id="blood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d81c1c"/><stop offset="1" stop-color="#7a0a0a"/></linearGradient>
+  </defs>
+  <path d="M100 8 C44 8 18 50 20 96 C21 121 33 136 47 146 L47 176 C47 185 54 191 63 191 L137 191 C146 191 153 185 153 176 L153 146 C167 136 179 121 180 96 C182 50 156 8 100 8 Z" fill="url(#bone)" stroke="#2a1812" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M30 70 C36 40 60 22 82 18" stroke="#fff" stroke-opacity="0.35" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M112 11 L101 38 L115 52 L99 80" stroke="#2a1410" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+  <path d="M111 11 L101 38 L115 52 L99 80 L95 80 L110 52 L96 38 L107 11 Z" fill="url(#blood)"/>
+  <path d="M97 80 C96 100 101 108 99 124" stroke="url(#blood)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <ellipse cx="68" cy="100" rx="21" ry="25" fill="#0f0606" stroke="#2a1812" stroke-width="3"/>
+  <ellipse cx="132" cy="100" rx="21" ry="25" fill="#0f0606" stroke="#2a1812" stroke-width="3"/>
+  <circle cx="68" cy="104" r="4.5" fill="#ff2a1a"><animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" repeatCount="indefinite"/></circle>
+  <circle cx="132" cy="104" r="4.5" fill="#ff2a1a"><animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" repeatCount="indefinite"/></circle>
+  <path d="M58 122 C55 146 62 168 59 204 C59 212 71 212 71 204 C70 170 76 146 74 124 Z" fill="url(#blood)"/>
+  <path d="M126 124 C124 148 130 160 128 186 C128 193 138 193 138 186 C137 160 143 146 142 122 Z" fill="url(#blood)"/>
+  <path d="M100 124 L89 150 L100 144 L111 150 Z" fill="#120808"/>
+  <rect x="60" y="160" width="80" height="30" rx="4" fill="#120808"/>
+  <g fill="#efe8d4" stroke="#2a1812" stroke-width="1.5">
+    <rect x="62" y="160" width="10" height="24" rx="2"/><rect x="73" y="160" width="10" height="26" rx="2"/><rect x="84" y="160" width="10" height="24" rx="2"/><rect x="95" y="160" width="10" height="27" rx="2"/><rect x="106" y="160" width="10" height="24" rx="2"/><rect x="117" y="160" width="10" height="26" rx="2"/><rect x="128" y="160" width="10" height="24" rx="2"/>
+  </g>
+  <path d="M82 188 C80 204 86 214 84 232 C84 240 94 240 94 232 C93 214 99 204 97 190 Z" fill="url(#blood)"/>
+  <path d="M112 188 C112 198 115 204 114 214 C114 219 121 219 121 214 C121 204 124 198 123 188 Z" fill="url(#blood)"/>
+  <circle cx="65" cy="214" r="4" fill="#a01212"><animate attributeName="cy" values="212;246" dur="2.1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" dur="2.1s" repeatCount="indefinite"/></circle>
+  <circle cx="133" cy="196" r="3.5" fill="#a01212"><animate attributeName="cy" values="194;246" dur="2.8s" begin="0.7s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" dur="2.8s" begin="0.7s" repeatCount="indefinite"/></circle>
+  <circle cx="89" cy="242" r="3.5" fill="#a01212"><animate attributeName="cy" values="241;249" dur="1.6s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1.6s" begin="0.3s" repeatCount="indefinite"/></circle>
+</svg>

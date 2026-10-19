@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Haunted Hallways</title>
+<style>
+  :root { --acc:#e8b04a; --red:#c0392b; --ink:#e9e6df; --bg:#07090f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; background:#000; color:var(--ink); font-family:'Segoe UI', Roboto, Arial, sans-serif; overflow:hidden; user-select:none; -webkit-user-select:none; touch-action:none; }
+  #game { position:fixed; inset:0; } #game canvas { display:block; width:100%; height:100%; }
+  .screen { position:fixed; inset:0; display:none; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:18px; overflow-y:auto; z-index:20; background:rgba(3,4,8,0.92); } .screen > :first-child { margin-top:auto; } .screen > :last-child { margin-bottom:auto; }
+  .screen.on { display:flex; }
+  #title { background:radial-gradient(ellipse at 50% 38%, rgba(50,12,12,0.6), rgba(3,4,8,0.9) 75%); }
+  h1.logo { font-family:Georgia, 'Times New Roman', serif; font-size:clamp(38px,9vw,92px); letter-spacing:6px; margin:0; color:#e8d9bb; text-shadow:0 0 22px rgba(160,20,20,0.7), 0 4px 0 #3a0c0c; font-weight:700; }
+  h1.logo small { display:block; font-size:0.28em; letter-spacing:10px; color:#b8483a; margin-top:4px; }
+  .sub { opacity:0.8; margin:10px 0 22px; font-size:clamp(14px,2.4vw,19px); max-width:620px; line-height:1.5; }
+  .btn { font:inherit; font-size:clamp(16px,2.6vw,22px); font-weight:700; letter-spacing:2px; padding:12px 38px; margin:6px; min-width:min(300px,80vw); border-radius:6px; border:2px solid #6b2a24; background:linear-gradient(#3a1512,#1d0a09); color:#f0e3c8; cursor:pointer; text-transform:uppercase; }
+  .btn:hover, .btn:active { background:linear-gradient(#5a1f1a,#2b0e0c); border-color:#b8483a; }
+  .btn.small { font-size:15px; padding:8px 18px; min-width:0; letter-spacing:1px; }
+  .btn:disabled { opacity:0.45; cursor:default; }
+  .seg { display:inline-flex; border:1px solid #5a2a24; border-radius:8px; overflow:hidden; margin:4px; } .seg button { font:inherit; padding:8px 14px; background:#1a0c0b; color:var(--ink); border:0; border-right:1px solid #3a1c18; cursor:pointer; } .seg button:last-child { border-right:0; } .seg button.on { background:#8a2a22; font-weight:700; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:16px; width:min(460px,92vw); margin:8px 0; text-align:left; }
+  .card { background:rgba(20,12,12,0.9); border:1px solid #4a2420; border-radius:12px; padding:18px 22px; max-width:min(680px,94vw); text-align:left; line-height:1.55; font-size:15px; }
+  .card h3 { margin:12px 0 4px; color:var(--acc); font-size:16px; } .card b { color:#f2d9a0; }
+  input[type=range] { width:180px; accent-color:#c0392b; }
+  /* in-game HUD */
+  #hud { position:fixed; inset:0; display:none; pointer-events:none; z-index:10; }
+  #hud.on { display:block; }
+  #dot { position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px; border-radius:50%; background:rgba(255,255,255,0.55); box-shadow:0 0 4px #000; } #dot.hot { background:#ffd27a; width:9px; height:9px; margin:-4.5px; }
+  #prompt { position:absolute; left:50%; top:58%; transform:translateX(-50%); font-size:clamp(16px,2.6vw,22px); text-shadow:0 2px 6px #000, 0 0 12px #000; text-align:center; opacity:0; transition:opacity .12s; white-space:nowrap; } #prompt.on { opacity:1; } #prompt kbd { background:rgba(0,0,0,0.65); border:1px solid #aaa; border-radius:5px; padding:1px 8px; margin-right:6px; font-weight:700; }
+  #msg { position:absolute; left:50%; top:12%; transform:translateX(-50%); width:min(760px,92vw); text-align:center; font-size:clamp(16px,2.8vw,24px); text-shadow:0 2px 8px #000; opacity:0; transition:opacity .35s; line-height:1.35; } #msg.on { opacity:1; }
+  #nights { position:absolute; left:14px; top:12px; font-family:Georgia,serif; font-size:clamp(15px,2.4vw,22px); text-shadow:0 2px 6px #000; letter-spacing:2px; } #nights small { display:block; font-size:0.62em; opacity:0.75; letter-spacing:1px; font-family:'Segoe UI',Arial,sans-serif; }
+  #noise { position:absolute; right:14px; top:12px; font-size:22px; text-shadow:0 2px 6px #000; opacity:0.9; } #noise i { display:inline-block; width:7px; margin-left:3px; border-radius:2px; background:#4a4a4a; vertical-align:bottom; } #noise i.on { background:#e8b04a; } #noise i.hot { background:#d83a2a; }
+  #bar { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); display:flex; gap:6px; pointer-events:auto; }
+  .slot { width:clamp(46px,7.4vw,70px); height:clamp(46px,7.4vw,70px); border-radius:8px; background:rgba(8,6,6,0.72); border:2px solid #4a3a32; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:clamp(20px,3.6vw,32px); position:relative; cursor:pointer; }
+  .slot.on { border-color:var(--acc); background:rgba(70,40,10,0.7); box-shadow:0 0 12px rgba(232,176,74,0.5); } .slot b { position:absolute; left:4px; top:1px; font-size:11px; opacity:0.65; font-weight:600; } .slot small { position:absolute; bottom:1px; font-size:clamp(8px,1.3vw,11px); opacity:0.85; max-width:100%; overflow:hidden; white-space:nowrap; }
+  #danger { position:absolute; inset:0; box-shadow:inset 0 0 160px 40px rgba(180,0,0,0); transition:box-shadow .2s; } #fade { position:absolute; inset:0; background:#000; opacity:0; transition:opacity .6s; z-index:5; } #hurt { position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(120,0,0,0) 30%, rgba(160,0,0,0.85) 100%); opacity:0; }
+  #hideTxt { position:absolute; left:50%; bottom:24%; transform:translateX(-50%); font-size:18px; text-shadow:0 2px 6px #000; opacity:0; } #hideTxt.on { opacity:0.9; }
+  #hudHelp { position:absolute; left:14px; bottom:14px; font-size:12px; opacity:0.55; line-height:1.5; text-shadow:0 1px 3px #000; }
+  /* touch controls */
+  #touch { position:fixed; inset:0; display:none; z-index:12; pointer-events:none; } body.touchmode #touch.on { display:block; } body.touchmode #hudHelp { display:none; }
+  #stick { position:absolute; left:calc(18px + env(safe-area-inset-left)); bottom:calc(20px + env(safe-area-inset-bottom)); width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.22); pointer-events:auto; touch-action:none; } #stick i { position:absolute; left:50%; top:50%; width:58px; height:58px; margin:-29px; border-radius:50%; background:rgba(255,255,255,0.28); }
+  #lookzone { position:absolute; right:0; top:0; width:52%; height:100%; pointer-events:auto; touch-action:none; }
+  .tb { position:absolute; width:62px; height:62px; border-radius:50%; background:rgba(255,255,255,0.14); border:2px solid rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; letter-spacing:1px; pointer-events:auto; touch-action:none; text-align:center; } .tb.down { background:rgba(232,176,74,0.5); }
+  #tUse { right:calc(24px + env(safe-area-inset-right)); bottom:calc(120px + env(safe-area-inset-bottom)); width:84px; height:84px; font-size:15px; background:rgba(190,60,40,0.4); } #tRun { right:calc(122px + env(safe-area-inset-right)); bottom:calc(30px + env(safe-area-inset-bottom)); } #tCrouch { right:calc(24px + env(safe-area-inset-right)); bottom:calc(30px + env(safe-area-inset-bottom)); } #tDrop { right:calc(24px + env(safe-area-inset-right)); bottom:calc(222px + env(safe-area-inset-bottom)); width:54px; height:54px; } #tPause { right:calc(70px + env(safe-area-inset-right)); top:calc(10px + env(safe-area-inset-top)); width:44px; height:44px; font-size:16px; } #tLook { right:calc(150px + env(safe-area-inset-right)); bottom:calc(130px + env(safe-area-inset-bottom)); display:none; }
+  body.touchmode #msg { top:24%; font-size:16px; } body.touchmode #noise { right:124px; top:16px; } body.touchmode #bar { bottom:auto; top:8px; left:50%; } body.touchmode .slot { width:40px; height:40px; font-size:20px; } body.touchmode #prompt { top:50%; } body.touchmode #nights { top:56px; }
+  #rotate { position:fixed; inset:0; z-index:90; background:#000; display:none; align-items:center; justify-content:center; text-align:center; font-size:22px; padding:30px; } @media (orientation:portrait) { body.touchmode.playing #rotate { display:flex; } }
+  /* code pad and notes */
+  #codePad { z-index:30; } .pad { display:grid; grid-template-columns:repeat(3,76px); gap:8px; margin:10px 0; } .pad button { font:inherit; font-size:26px; font-weight:700; height:62px; border-radius:8px; border:2px solid #5a3a30; background:#241410; color:#f0e3c8; cursor:pointer; } .pad button:active { background:#5a2a20; }
+  #codeShow { font-family:'Courier New',monospace; font-size:44px; letter-spacing:14px; background:#0b0605; border:2px solid #5a3a30; border-radius:8px; padding:6px 22px; min-width:260px; color:#ff6a4a; text-shadow:0 0 12px #c0392b; margin:6px 0; }
+  #note { z-index:30; } #note .paper ul { list-style:none; padding:0; margin:4px 0 10px; } #note .paper li { font-size:16px; line-height:1.5; } #note .paper h4 { margin:10px 0 2px; font-size:18px; } #note .paper { background:#d9c79a; color:#2a1c10; padding:26px 30px; max-width:min(520px,90vw); font-family:'Courier New',monospace; font-size:18px; line-height:1.6; transform:rotate(-1.2deg); box-shadow:0 10px 40px #000; text-align:left; border-radius:3px; }
+  #scare { position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; background:rgba(10,0,0,0.9); pointer-events:none; } #scare.on { display:flex; } #scareFace { width:min(92vw,92vh); height:min(92vw,92vh); filter:drop-shadow(0 0 40px #f00); animation:scs 0.07s infinite alternate; } @keyframes scs { from { transform:scale(1.12) translate(-8px,4px) rotate(-1deg); } to { transform:scale(1.18) translate(9px,-5px) rotate(1deg); } }
+  #loading { position:fixed; inset:0; z-index:100; background:#000; display:flex; align-items:center; justify-content:center; font-size:18px; letter-spacing:3px; color:#9a8a70; }
+  .endTitle { font-family:Georgia,serif; font-size:clamp(30px,7vw,64px); margin:0 0 8px; color:#e8d9bb; text-shadow:0 0 18px rgba(200,60,40,0.6); }
+</style>
+</head>
+<body>
+<div id="loading">Loading Haunted Hallways…</div>
+<div id="game"></div>
+
+<div id="hud">
+  <div id="danger"></div><div id="hurt"></div>
+  <div id="dot"></div>
+  <div id="nights"></div><div id="noise"></div>
+  <div id="msg"></div><div id="prompt"></div><div id="hideTxt"></div>
+  <div id="bar"></div>
+  <div id="hudHelp"><b>W A S D</b> move · <b>Shift</b> run · <b>C</b> crouch · <b>E</b> use / open · <b>1-8</b> items · <b>N</b> notebook · <b>Q</b> drop/throw · <b>Click</b> shoot crossbow · <b>Esc</b> pause</div>
+  <div id="fade"></div>
+</div>
+
+<div id="touch">
+  <div id="stick"><i></i></div><div id="lookzone"></div>
+  <div class="tb" id="tUse">USE</div><div class="tb" id="tRun">RUN</div><div class="tb" id="tCrouch">DUCK</div><div class="tb" id="tDrop">DROP</div><div class="tb" id="tBook" style="right:calc(124px + env(safe-area-inset-right)); top:calc(10px + env(safe-area-inset-top)); width:44px; height:44px; font-size:20px">📓</div><div class="tb" id="tPause">II</div><div class="tb" id="tShoot" style="right:calc(122px + env(safe-area-inset-right)); bottom:calc(118px + env(safe-area-inset-bottom)); display:none">FIRE</div>
+</div>
+<div id="rotate"><div>📱↻<br>Turn your phone sideways to play</div></div>
+
+<div class="screen on" id="title">
+  <div id="skullLogo" style="width:clamp(110px,22vh,190px);filter:drop-shadow(0 0 22px rgba(190,20,20,0.55));margin-bottom:6px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bone" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="#f4eedb"/><stop offset="0.7" stop-color="#d9d0b6"/><stop offset="1" stop-color="#9c9276"/></radialGradient>
+    <linearGradient id="blood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d81c1c"/><stop offset="1" stop-color="#7a0a0a"/></linearGradient>
+  </defs>
+  <path d="M100 8 C44 8 18 50 20 96 C21 121 33 136 47 146 L47 176 C47 185 54 191 63 191 L137 191 C146 191 153 185 153 176 L153 146 C167 136 179 121 180 96 C182 50 156 8 100 8 Z" fill="url(#bone)" stroke="#2a1812" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M30 70 C36 40 60 22 82 18" stroke="#fff" stroke-opacity="0.35" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M112 11 L101 38 L115 52 L99 80" stroke="#2a1410" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+  <path d="M111 11 L101 38 L115 52 L99 80 L95 80 L110 52 L96 38 L107 11 Z" fill="url(#blood)"/>
+  <path d="M97 80 C96 100 101 108 99 124" stroke="url(#blood)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <ellipse cx="68" cy="100" rx="21" ry="25" fill="#0f0606" stroke="#2a1812" stroke-width="3"/>
+  <ellipse cx="132" cy="100" rx="21" ry="25" fill="#0f0606" stroke="#2a1812" stroke-width="3"/>
+  <circle cx="68" cy="104" r="4.5" fill="#ff2a1a"><animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" repeatCount="indefinite"/></circle>
+  <circle cx="132" cy="104" r="4.5" fill="#ff2a1a"><animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" repeatCount="indefinite"/></circle>
+  <path d="M58 122 C55 146 62 168 59 204 C59 212 71 212 71 204 C70 170 76 146 74 124 Z" fill="url(#blood)"/>
+  <path d="M126 124 C124 148 130 160 128 186 C128 193 138 193 138 186 C137 160 143 146 142 122 Z" fill="url(#blood)"/>
+  <path d="M100 124 L89 150 L100 144 L111 150 Z" fill="#120808"/>
+  <rect x="60" y="160" width="80" height="30" rx="4" fill="#120808"/>
+  <g fill="#efe8d4" stroke="#2a1812" stroke-width="1.5">
+    <rect x="62" y="160" width="10" height="24" rx="2"/><rect x="73" y="160" width="10" height="26" rx="2"/><rect x="84" y="160" width="10" height="24" rx="2"/><rect x="95" y="160" width="10" height="27" rx="2"/><rect x="106" y="160" width="10" height="24" rx="2"/><rect x="117" y="160" width="10" height="26" rx="2"/><rect x="128" y="160" width="10" height="24" rx="2"/>
+  </g>
+  <path d="M82 188 C80 204 86 214 84 232 C84 240 94 240 94 232 C93 214 99 204 97 190 Z" fill="url(#blood)"/>
+  <path d="M112 188 C112 198 115 204 114 214 C114 219 121 219 121 214 C121 204 124 198 123 188 Z" fill="url(#blood)"/>
+  <circle cx="65" cy="214" r="4" fill="#a01212"><animate attributeName="cy" values="212;246" dur="2.1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" dur="2.1s" repeatCount="indefinite"/></circle>
+  <circle cx="133" cy="196" r="3.5" fill="#a01212"><animate attributeName="cy" values="194;246" dur="2.8s" begin="0.7s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" dur="2.8s" begin="0.7s" repeatCount="indefinite"/></circle>
+  <circle cx="89" cy="242" r="3.5" fill="#a01212"><animate attributeName="cy" values="241;249" dur="1.6s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1.6s" begin="0.3s" repeatCount="indefinite"/></circle>
+</svg>
+</div>
+  <h1 class="logo">HAUNTED<br>HALLWAYS<small id="tagline">FIVE NIGHTS TO ESCAPE</small></h1>
+  <div class="sub">You wake up locked in a room in a creepy old house. <b>Grandma Hettie</b> and <b>Grandpa Orville</b> live here, and they do <i>not</i> want you to leave. Find the keys and tools, sneak past them and escape before your nights run out.</div>
+  <div class="row"><span>Difficulty</span><div class="seg" id="segDiff"><button data-v="easy">Easy</button><button data-v="normal">Normal</button><button data-v="hard">Hard</button></div></div>
+  <button class="btn" id="btnPlay">Play</button>
+  <button class="btn small" id="btnHow">How to play</button><button class="btn small" id="btnSet">Settings</button>
+  <div class="sub" style="font-size:12px;margin-top:14px;opacity:0.55">This game is scary: loud noises and jumpscares. A fan-made game, not made by or connected to any other game.</div>
+</div>
+
+<div class="screen" id="howto"><div class="card"><h2 style="margin:0 0 6px;color:#e8d9bb">How to play</h2>
+  <h3>The goal</h3>Escape the house before you run out of nights. When Grandma or Grandpa catches you, a night passes and you wake up back in your room. Your items stay with you.
+  <h3>Hunters</h3><b>Grandma Hettie</b> is fast and hears <i>everything</i>: footsteps when you run, doors, dropped things. <b>Grandpa Orville</b> is slow and a bit deaf. He only reacts to loud noises, but he is tough and hard to stop.
+  <h3>Sneak</h3>Walk or crouch to stay quiet. <b>Running, slamming doors, dropping items and hammering are LOUD.</b> The noise meter in the corner shows how loud you are. Close doors behind you.
+  <h3>Hide</h3>Step inside a <b>wardrobe</b> or <b>locker</b> with USE and press USE again to come out. If they did not see you hide, they will walk away. If they saw you, they will check there!
+  <h3>Escape</h3>Open drawers and cupboards to find <b>keys, tools and parts</b>. Use a key on its door, find the code for the study, pry boards off with a crowbar. Then pick a way out:<br>🚪 <b>Front door:</b> its key + a crowbar<br>⛵ <b>Boat (back garden dock):</b> boat key, propeller, fuel<br>🚗 <b>Car (garage):</b> car key, battery, fuel, a fuse for the basement fuse box (power for the garage button) and bolt cutters for the gate chain
+  <h3>Fight back</h3>Find the <b>crossbow</b> and some bolts. A hit stuns a hunter for a while (Orville recovers faster). Throw a <b>bottle</b> or <b>teddy</b> to make noise somewhere else.
+  <div style="text-align:center;margin-top:14px"><button class="btn small" id="howClose">Back</button></div></div></div>
+
+<div class="screen" id="settings"><div class="card" style="text-align:center"><h2 style="margin:0 0 10px;color:#e8d9bb">Settings</h2>
+  <div class="row"><span>Look speed</span><input type="range" id="rngSens" min="0.4" max="3" step="0.1"></div>
+  <div class="row"><span>Volume</span><input type="range" id="rngVol" min="0" max="1" step="0.05"></div>
+  <div class="row"><span>Brightness</span><input type="range" id="rngBright" min="0.7" max="2" step="0.05"></div>
+  <div class="row"><span>Graphics</span><div class="seg" id="segQ"><button data-v="high">High</button><button data-v="low">Fast</button></div></div>
+  <div class="row"><span>Jumpscares</span><div class="seg" id="segScare"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+  <button class="btn small" id="setClose">Back</button></div></div>
+
+<div class="screen" id="pause"><h1 class="logo" style="font-size:clamp(30px,6vw,56px)">PAUSED</h1><button class="btn" id="btnResume">Resume</button><button class="btn small" id="btnBook">Notebook</button><button class="btn small" id="btnPauseSet">Settings</button><button class="btn small" id="btnQuit">Quit to menu</button></div>
+
+<div class="screen" id="codePad"><div class="sub" style="margin:0">Study door lock</div><div id="codeShow">----</div><div class="pad" id="padBtns"></div><button class="btn small" id="codeClose">Cancel</button></div>
+<div class="screen" id="note"><div class="paper" id="noteText"></div><button class="btn small" id="noteClose" style="margin-top:16px">Close</button></div>
+
+<div class="screen" id="over"><h1 class="endTitle" id="overTitle"></h1><div class="sub" id="overText"></div><button class="btn" id="btnAgain">Try again</button><button class="btn small" id="btnOverMenu">Menu</button></div>
+<div id="scare"><canvas id="scareFace" width="512" height="512"></canvas></div>
+
+<script src="vendor/three.min.js"></script>
+<script>
+/*@@CODE@@*/
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+</body>
+</html>
