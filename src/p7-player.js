@@ -19,7 +19,7 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
-document.addEventListener('mousemove', e => { if (G.state === 'play' && !P.busy && document.pointerLockElement) look(e.movementX, e.movementY, 0.0022); });
+document.addEventListener('mousemove', e => { if (G.state === 'play' && !P.busy && !uiOpen() && (document.pointerLockElement || e.buttons)) look(e.movementX, e.movementY, 0.0022); });
 document.addEventListener('mousedown', e => { if (G.state === 'play' && document.pointerLockElement && e.button === 0) primary(); else if (G.state === 'play' && !document.pointerLockElement && !TOUCH && !uiOpen() && e.target === renderer.domElement) lockPointer(); });
 addEventListener('wheel', e => { if (G.state === 'play' && !uiOpen()) selectSlot((P.sel + (e.deltaY > 0 ? 1 : INV_SLOTS - 1)) % INV_SLOTS); }, { passive: true });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && G.state === 'play' && !uiOpen() && !G.noPause) pauseGame(); });
